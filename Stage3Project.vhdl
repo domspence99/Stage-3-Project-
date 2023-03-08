@@ -1,5 +1,5 @@
 VHDL Code
-Receive: PROCESS (clock)
+Receive: PROCESS(clock)
 BEGIN
 
 IF rising_edge(clock) THEN  --At the rising edge of the clock do the following
@@ -7,18 +7,18 @@ IF rising_edge(clock) THEN  --At the rising edge of the clock do the following
   CASE Rx_state IS  --FSM to receive bytes of data via an RS232 wire
 
   WHEN RxIdle =>  --System waits in idle state until Rx goes low
-  current _ rx_byte <= "00000000";  --Initialises current byte to be empty
+  current_rx_byte <= "00000000";  --Initialises current byte to be empty
   IF(Rx = '0') THEN
-  rx_clk_ counter <= 0  --When Rx goes low, system moves into idle state
+  rx_clk_counter <= 0  --When Rx goes low, system moves into idle state
   Rx_state <= RxStart;
   ELSE
   Rx_state <= RxIdle;  --If Rx remains high, system idles
   END IF;
 
   WHEN RxStart =>
-  IF(rx_clk_counter = (xrx_clks_per bit/2)) THEN --When in start state, system counts a half bit period and checks if line 1s still low
+  IF(rx_clk_counter = (xrx_clks_per_bit/2)) THEN --When in start state, system counts a half bit period and checks if line 1s still low
     IF Rx = '0' THEN  --If the start bit is still low then start is validated and system moves to data state
-    rx_clk_ counter <= 0;
+    rx_clk_counter <= 0;
     Rx_state <= RxData;
     ELSE
     Rx_state <= RxIdle; --If start bit is not low, then start is invalid and system moves back to idle state
@@ -33,7 +33,7 @@ IF rising_edge(clock) THEN  --At the rising edge of the clock do the following
   rx_clk_counter <= rx_clk_counter + 1;
   Rx_state <= RxData;
     ELSE IF(rx_databit_index < 8) THEN --Stores the line value in next bit of array
-    current rx_byte(rx_databit_index) <= Rx; --Repeated for all 2 bits
+    current_rx_byte(rx_databit_index) <= Rx; --Repeated for all 2 bits
     rx_databit_index <= rx_databit_index + 1;
     rx_clk_counter <= 0;
     Rx_state <= RxData;
@@ -49,7 +49,7 @@ IF rising_edge(clock) THEN  --At the rising edge of the clock do the following
 
   WHEN RxStop => --When in stop state, system counts 1 bit period and validates stop bit
   IF(rx_clk_counter < rx_clks_per_bit) THEN
-  rx_clk_counter <= rx_clk counter +1;
+  rx_clk_counter <= rx_clk_counter +1;
   Rx_state <= RxStop;
   ELSE
   Rx_state <= RxIdle; --Once detected, moved back to idle state
@@ -61,7 +61,7 @@ IF rising_edge(clock) THEN  --At the rising edge of the clock do the following
   END CASE;
 
 
-  IF (RxBuffer(0) = x"77") THEN --IF a write operation is required, expect 6 inputs (2 extra for byte to write
+  IF (RxBuffer(0) = x"77") THEN --IF a write operation is required, expect 6 inputs (2 extra for byte to write)
   rx_expected_inputs <= 8;
   ELSE
   rx_expected_inputs <= 6; --Else just expect 6
@@ -80,7 +80,7 @@ IF rising_edge(clock) THEN  --At the rising edge of the clock do the following
 END PROCESS Receive;
 
 
-Converter: PROCESS (clock, rx_inputs_ complete) --Process is activated when the all © inputs are stored in recéive buffer
+Converter: PROCESS(clock, rx_inputs_complete) --Process is activated when the all © inputs are stored in recéive buffer
 BEGIN
   
   IF rising_edge(clock) THEN
